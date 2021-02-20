@@ -3,10 +3,7 @@ defmodule TodoTex.ParserHelper do
 
   import NimbleParsec
 
-  def map_done(?x), do: {:done, true}
-  def map_done(_), do: {:done, false}
-
-  def map_priority(pri), do: {:priority, pri}
+  def map_priority(pri), do: {:priority, <<pri>>}
 
   def map_date(_rest, results, context, _line, _offset, tag) do
     {[{:date, tag, apply(Date, :new!, Enum.reverse(results))}], context}
@@ -16,7 +13,7 @@ end
 defmodule TodoTex.TodoParser do
   import NimbleParsec
 
-  done = ascii_char([?x]) |> map({TodoTex.ParserHelper, :map_done, []})
+  done = ascii_char([?x]) |> replace({:done, true})
 
   priority =
     ignore(string("("))

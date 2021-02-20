@@ -32,7 +32,7 @@ defmodule TodoTex.Todo do
     do: _add_metadata(%__MODULE__{todo | done: done}, rest)
 
   defp _add_metadata(todo, [{:priority, pri} | rest]),
-    do: _add_metadata(%__MODULE__{todo | priority: <<pri>>}, rest)
+    do: _add_metadata(%__MODULE__{todo | priority: pri}, rest)
 
   defp _add_metadata(todo, [{:date, :start, date} | rest]),
     do: _add_metadata(%__MODULE__{todo | start_date: date}, rest)
