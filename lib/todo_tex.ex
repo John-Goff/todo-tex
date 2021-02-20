@@ -20,8 +20,16 @@ defmodule TodoTex do
   """
   def read!(path) when is_binary(path) do
     file = File.open!(path, [:read, :utf8])
-    list = parse_lines(file)
+    list = _parse_lines(file, [])
     File.close(file)
     %TodoTex{path: path, items: list}
+  end
+
+  defp _parse_lines(file, items) do
+    case IO.read(file, :line) do
+      :eof -> items
+      {:error, _reason} -> items
+      line_data -> _parse_lines(file, [TodoTex.Todo.parse(line_data) | items])
+    end
   end
 end
