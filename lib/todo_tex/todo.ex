@@ -8,6 +8,17 @@ defmodule TodoTex.Todo do
 
   alias TodoTex.TodoParser
 
+  @type t() :: %__MODULE__{
+          priority: String.t() | nil,
+          start_date: Date.t() | nil,
+          end_date: Date.t() | nil,
+          done: boolean(),
+          projects: [String.t()],
+          contexts: [String.t()],
+          task: String.t(),
+          original: String.t()
+        }
+
   defstruct priority: nil,
             start_date: nil,
             end_date: nil,
@@ -17,6 +28,15 @@ defmodule TodoTex.Todo do
             task: "",
             original: ""
 
+  @doc """
+  Turns a string into a properly formatted `%TodoTex.Todo{}` struct.
+
+  The only string which will return an error is the empty string, `""`. All
+  other strings can be considered to have at least a task, which is just plain
+  text. If the string has other metadata, such as completion, date, or contexts,
+  that will be filled into the returned struct correctly.
+  """
+  @spec parse(String.t()) :: {:ok, t()} | {:error, :no_data}
   def parse(string) when is_binary(string) do
     case TodoParser.todo(string) do
       {:ok, [], "", _context, _line, _offset} ->
