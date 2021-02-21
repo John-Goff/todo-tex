@@ -23,8 +23,9 @@ defmodule TodoTex.Todo do
         {:error, :no_data}
 
       {:ok, metadata, task, _context, _line, _offset} ->
-        IO.inspect(metadata)
-        {:ok, %__MODULE__{task: task, original: string} |> _add_metadata(metadata)}
+        todo = %__MODULE__{task: task, original: string} |> _add_metadata(metadata)
+
+        {:ok, todo}
     end
   end
 
