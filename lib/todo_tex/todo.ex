@@ -102,16 +102,16 @@ defmodule TodoTex.Todo do
   end
 
   defp _add_metadata(todo, [{:done, completed} | rest]),
-    do: _add_metadata(%__MODULE__{todo | completed: completed}, rest)
+    do: todo |> set_completed(completed) |> _add_metadata(rest)
 
   defp _add_metadata(todo, [{:priority, pri} | rest]),
     do: todo |> set_priority(pri) |> _add_metadata(rest)
 
   defp _add_metadata(todo, [{:date, :start, date} | rest]),
-    do: _add_metadata(%__MODULE__{todo | start_date: date}, rest)
+    do: todo |> set_start_date(date) |> _add_metadata(rest)
 
   defp _add_metadata(todo, [{:date, :end, date} | rest]),
-    do: _add_metadata(%__MODULE__{todo | end_date: date}, rest)
+    do: todo |> set_end_date(date) |> _add_metadata(rest)
 
   defp _add_metadata(todo, []), do: todo
 
@@ -157,6 +157,7 @@ defmodule TodoTex.Todo do
       "x (A) 2021-01-01 2021-01-01 Call Mom"
 
   """
+  @spec to_string(todo :: t()) :: String.t()
   def to_string(%__MODULE__{} = todo), do: _to_string(todo, "")
 
   defp _to_string(%__MODULE__{completed: true} = todo, string) do
@@ -205,6 +206,7 @@ defmodule TodoTex.Todo do
       %Todo{completed: false}
 
   """
+  @spec set_completed(todo :: t(), complete :: boolean()) :: t()
   def set_completed(%__MODULE__{} = todo, complete) when is_boolean(complete),
     do: %__MODULE__{todo | completed: complete}
 
@@ -229,6 +231,42 @@ defmodule TodoTex.Todo do
       ** (FunctionClauseError) no function clause matching in TodoTex.Todo.set_priority/2
 
   """
+  @spec set_priority(todo :: t(), priority :: String.t()) :: t()
   def set_priority(%__MODULE__{} = todo, <<priority::utf8>>) when priority in ?A..?Z,
     do: %__MODULE__{todo | priority: <<priority>>}
+
+  @doc """
+  Sets the start date of a task.
+
+  Does not update the task on disk, only the returned task in memory.
+
+  ## Examples
+
+  iex> Todo.set_start_date(%Todo{}, ~D[2021-01-01])
+  %Todo{start_date: ~D[2021-01-01]}
+
+  iex> Todo.set_start_date(%Todo{}, :badarg)
+  ** (FunctionClauseError) no function clause matching in TodoTex.Todo.set_start_date/2
+
+  """
+  @spec set_start_date(todo :: t(), start_date :: Date.t()) :: t()
+  def set_start_date(%__MODULE__{} = todo, %Date{} = date),
+    do: %__MODULE__{todo | start_date: date}
+
+  @doc """
+  Sets the end date of a task.
+
+  Does not update the task on disk, only the returned task in memory.
+
+  ## Examples
+
+  iex> Todo.set_end_date(%Todo{}, ~D[2021-01-01])
+  %Todo{end_date: ~D[2021-01-01]}
+
+  iex> Todo.set_end_date(%Todo{}, :badarg)
+  ** (FunctionClauseError) no function clause matching in TodoTex.Todo.set_end_date/2
+
+  """
+  @spec set_end_date(todo :: t(), end_date :: Date.t()) :: t()
+  def set_end_date(%__MODULE__{} = todo, %Date{} = date), do: %__MODULE__{todo | end_date: date}
 end
