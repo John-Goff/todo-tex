@@ -167,4 +167,18 @@ defmodule TodoTex.Todo do
   end
 
   defp _to_string(%__MODULE__{task: task}, string), do: string <> task
+
+  @doc """
+  Marks a single task as complete.
+
+  Does not change the task on disk, only updates the returned task in memory.
+
+  ## Examples
+
+      iex> Todo.complete(%Todo{done: false})
+      %Todo{done: true}
+
+  """
+  @spec complete(todo :: t()) :: t()
+  def complete(%__MODULE__{} = todo), do: %__MODULE__{todo | done: true}
 end

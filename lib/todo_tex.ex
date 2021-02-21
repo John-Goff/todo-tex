@@ -43,4 +43,25 @@ defmodule TodoTex do
         _parse_lines(file, [TodoTex.Todo.parse!(String.trim_trailing(line_data)) | items])
     end
   end
+
+  @doc """
+  Marks the task at `index` as complete.
+
+  Index starts at zero for the first task in the list. This function will not
+  update the underlying `todo.txt` file, it will only change the tasks in
+  memory. To write the changed tasks back to disk see `write!/1`.
+
+  ## Examples
+
+      iex> TodoTex.complete(%TodoTex{items: [%TodoTex.Todo{done: false}]}, 0)
+      %TodoTex{items: [%TodoTex.Todo{done: true}]}
+
+      iex> TodoTex.complete(%TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{done: false}]}, 1)
+      %TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{done: true}]}
+
+  """
+  @spec complete(t(), non_neg_integer()) :: t()
+  def complete(%TodoTex{items: items} = todolist, index) when is_integer(index) and index >= 0 do
+    %__MODULE__{todolist | items: List.update_at(items, index, &TodoTex.Todo.complete/1)}
+  end
 end
