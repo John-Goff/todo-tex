@@ -3,7 +3,16 @@ defmodule TodoTex.Todo do
   Work with individual todo line items.
 
   Provides a struct for representing a line item as well as functions to parse
-  a `todo.txt` formatted line into a struct.
+  a `todo.txt` formatted line into a struct. Setters are also provided for
+  every field except `projects` and `contexts`. The correct way to update
+  projects and contexts is to use one of `prepend_task/2`, `append_task/2` or
+  `set_task/2` to add the project or context to the task text, which will also
+  populate the `projects` and `contexts` fields of the struct. The reason for
+  this is so users can decide whether they prefer appending or prepending new
+  contexts/projects when they are added. Since the `todo.txt` format is meant
+  to be human readable, providing as many options for formatting as possible
+  while still adhering to the spec is a goal. Suggestions on how you are using
+  `todo.txt` and how this library can better fit with your workflow are welcome.
   """
 
   alias TodoTex.TodoParser
