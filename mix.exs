@@ -22,6 +22,7 @@ defmodule TodoTex.MixProject do
       {:nimble_parsec, "~> 1.1"},
       # Dev tools
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+      {:ex_doc, "~> 0.23", only: :dev, runtime: false}
     ]
   end
 end
