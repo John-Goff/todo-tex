@@ -1,0 +1,4 @@
+(A) Test this library +todo_tex @coding @opensource
+(B) 2021-01-01 Dates should work well +todo_tex
+basic tasks should also work fine
+x completed tasks should work fine

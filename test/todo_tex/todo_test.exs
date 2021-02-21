@@ -3,5 +3,5 @@ defmodule TodoTex.TodoTest do
   import TodoTex.Todo
   alias TodoTex.Todo
 
-  doctest TodoTex.Todo
+  doctest Todo
 end
