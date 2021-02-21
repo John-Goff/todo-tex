@@ -19,7 +19,9 @@ defmodule TodoTex.MixProject do
 
   defp deps do
     [
-      {:nimble_parsec, "~> 1.1"}
+      {:nimble_parsec, "~> 1.1"},
+      # Dev tools
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
     ]
   end
 end

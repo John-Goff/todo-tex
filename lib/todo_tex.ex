@@ -7,7 +7,12 @@ defmodule TodoTex do
   of the format.
   """
 
-  defstruct [:path, :items]
+  @type t() :: %__MODULE__{
+          path: String.t() | nil,
+          items: [TodoTex.Todo.t()]
+        }
+
+  defstruct path: nil, items: []
 
   @doc """
   Reads a `todo.txt` file and returns a `TodoTex` struct with a list of todo items.
@@ -18,6 +23,7 @@ defmodule TodoTex do
       %TodoTex{path: "/path/to/todo.txt", list: [%TodoTex.Item{}, ...]}
 
   """
+  @spec read!(path :: String.t()) :: t()
   def read!(path) when is_binary(path) do
     file = File.open!(path, [:read, :utf8])
     list = _parse_lines(file, [])
