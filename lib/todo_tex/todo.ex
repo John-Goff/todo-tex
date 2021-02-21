@@ -35,6 +35,38 @@ defmodule TodoTex.Todo do
   other strings can be considered to have at least a task, which is just plain
   text. If the string has other metadata, such as completion, date, or contexts,
   that will be filled into the returned struct correctly.
+
+  ## Examples
+
+      iex> parse("x Call Mom")
+      {:ok, %Todo{done: true, task: "Call Mom", original: "x Call Mom"}}
+
+      iex> parse("x (A) 2021-01-02 2021-01-01 Make a New Years Resolution")
+      {:ok,
+        %Todo{
+          done: true,
+          task: "Make a New Years Resolution",
+          original: "x (A) 2021-01-02 2021-01-01 Make a New Years Resolution",
+          start_date: ~D[2021-01-01],
+          end_date: ~D[2021-01-02],
+          priority: "A"
+        }}
+
+      iex> parse("+projects and @contexts can be +anywhere in the @task")
+      {:ok,
+        %Todo{
+          projects: ["projects", "anywhere"],
+          contexts: ["contexts", "task"],
+          task: "+projects and @contexts can be +anywhere in the @task",
+          original: "+projects and @contexts can be +anywhere in the @task"
+        }}
+
+      iex> parse("")
+      {:error, :no_data}
+
+      iex> parse(:badarg)
+      ** (FunctionClauseError) no function clause matching in TodoTex.Todo.parse/1
+
   """
   @spec parse(String.t()) :: {:ok, t()} | {:error, :no_data}
   def parse(string) when is_binary(string) do
