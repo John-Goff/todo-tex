@@ -38,10 +38,10 @@ defmodule TodoTex.Todo do
 
   ## Examples
 
-      iex> parse("x Call Mom")
+      iex> Todo.parse("x Call Mom")
       {:ok, %Todo{done: true, task: "Call Mom", original: "x Call Mom"}}
 
-      iex> parse("x (A) 2021-01-02 2021-01-01 Make a New Years Resolution")
+      iex> Todo.parse("x (A) 2021-01-02 2021-01-01 Make a New Years Resolution")
       {:ok,
         %Todo{
           done: true,
@@ -52,7 +52,7 @@ defmodule TodoTex.Todo do
           priority: "A"
         }}
 
-      iex> parse("+projects and @contexts can be +anywhere in the @task")
+      iex> Todo.parse("+projects and @contexts can be +anywhere in the @task")
       {:ok,
         %Todo{
           projects: ["projects", "anywhere"],
@@ -61,10 +61,10 @@ defmodule TodoTex.Todo do
           original: "+projects and @contexts can be +anywhere in the @task"
         }}
 
-      iex> parse("")
+      iex> Todo.parse("")
       {:error, :no_data}
 
-      iex> parse(:badarg)
+      iex> Todo.parse(:badarg)
       ** (FunctionClauseError) no function clause matching in TodoTex.Todo.parse/1
 
   """
@@ -124,4 +124,51 @@ defmodule TodoTex.Todo do
     |> Enum.filter(fn str -> String.starts_with?(str, prefix) end)
     |> Enum.map(fn str -> str |> String.graphemes() |> tl() |> Enum.join() end)
   end
+
+  @doc """
+  Turns a `%TodoTex.Todo{}` struct into a string for display or writing to a file.
+
+  The opposite of `parse/1`.
+
+  ## Examples
+
+      iex> Todo.to_string(%Todo{task: "Simple Task"})
+      "Simple Task"
+
+      iex> Todo.to_string(%Todo{
+      ...>   task: "Learn to +drive @goals",
+      ...>   priority: "C",
+      ...>   start_date: ~D[2014-01-01],
+      ...> })
+      "(C) 2014-01-01 Learn to +drive @goals"
+
+      iex> Todo.to_string(%Todo{
+      ...>   task: "Call Mom",
+      ...>   done: true,
+      ...>   priority: "A",
+      ...>   start_date: ~D[2021-01-01],
+      ...>   end_date: ~D[2021-01-01]
+      ...> })
+      "x (A) 2021-01-01 2021-01-01 Call Mom"
+
+  """
+  def to_string(%__MODULE__{} = todo), do: _to_string(todo, "")
+
+  defp _to_string(%__MODULE__{done: true} = todo, string) do
+    _to_string(%__MODULE__{todo | done: false}, "x " <> string)
+  end
+
+  defp _to_string(%__MODULE__{priority: pri} = todo, string) when not is_nil(pri) do
+    _to_string(%__MODULE__{todo | priority: nil}, "#{string}(#{pri}) ")
+  end
+
+  defp _to_string(%__MODULE__{end_date: date} = todo, string) when not is_nil(date) do
+    _to_string(%__MODULE__{todo | end_date: nil}, string <> Kernel.to_string(date) <> " ")
+  end
+
+  defp _to_string(%__MODULE__{start_date: date} = todo, string) when not is_nil(date) do
+    _to_string(%__MODULE__{todo | start_date: nil}, string <> Kernel.to_string(date) <> " ")
+  end
+
+  defp _to_string(%__MODULE__{task: task}, string), do: string <> task
 end
