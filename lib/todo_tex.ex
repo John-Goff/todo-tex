@@ -53,11 +53,11 @@ defmodule TodoTex do
 
   ## Examples
 
-      iex> TodoTex.complete(%TodoTex{items: [%TodoTex.Todo{done: false}]}, 0)
-      %TodoTex{items: [%TodoTex.Todo{done: true}]}
+      iex> TodoTex.complete(%TodoTex{items: [%TodoTex.Todo{completed: false}]}, 0)
+      %TodoTex{items: [%TodoTex.Todo{completed: true}]}
 
-      iex> TodoTex.complete(%TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{done: false}]}, 1)
-      %TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{done: true}]}
+      iex> TodoTex.complete(%TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{completed: false}]}, 1)
+      %TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{completed: true}]}
 
   """
   @spec complete(t(), non_neg_integer()) :: t()

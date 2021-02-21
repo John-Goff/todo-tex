@@ -12,7 +12,7 @@ defmodule TodoTex.Todo do
           priority: String.t() | nil,
           start_date: Date.t() | nil,
           end_date: Date.t() | nil,
-          done: boolean(),
+          completed: boolean(),
           projects: [String.t()],
           contexts: [String.t()],
           task: String.t()
@@ -21,7 +21,7 @@ defmodule TodoTex.Todo do
   defstruct priority: nil,
             start_date: nil,
             end_date: nil,
-            done: false,
+            completed: false,
             projects: [],
             contexts: [],
             task: ""
@@ -37,12 +37,12 @@ defmodule TodoTex.Todo do
   ## Examples
 
       iex> Todo.parse("x Call Mom")
-      {:ok, %Todo{done: true, task: "Call Mom"}}
+      {:ok, %Todo{completed: true, task: "Call Mom"}}
 
       iex> Todo.parse("x (A) 2021-01-02 2021-01-01 Make a New Years Resolution")
       {:ok,
         %Todo{
-          done: true,
+          completed: true,
           task: "Make a New Years Resolution",
           start_date: ~D[2021-01-01],
           end_date: ~D[2021-01-02],
@@ -83,17 +83,26 @@ defmodule TodoTex.Todo do
 
   @doc """
   Same as `parse/1` but raises if the string could not be parsed.
+
+  ## Examples
+
+      iex> Todo.parse!("x Call Mom")
+      %Todo{completed: true, task: "Call Mom"}
+
+      iex> Todo.parse!("")
+      ** (ArgumentError) could not parse todo
+
   """
   @spec parse!(String.t()) :: t()
   def parse!(string) do
     case parse(string) do
       {:ok, todo} -> todo
-      _error -> raise "could not parse todo"
+      _error -> raise ArgumentError, "could not parse todo"
     end
   end
 
-  defp _add_metadata(todo, [{:done, done} | rest]),
-    do: _add_metadata(%__MODULE__{todo | done: done}, rest)
+  defp _add_metadata(todo, [{:done, completed} | rest]),
+    do: _add_metadata(%__MODULE__{todo | completed: completed}, rest)
 
   defp _add_metadata(todo, [{:priority, pri} | rest]),
     do: todo |> set_priority(pri) |> _add_metadata(rest)
@@ -140,7 +149,7 @@ defmodule TodoTex.Todo do
 
       iex> Todo.to_string(%Todo{
       ...>   task: "Call Mom",
-      ...>   done: true,
+      ...>   completed: true,
       ...>   priority: "A",
       ...>   start_date: ~D[2021-01-01],
       ...>   end_date: ~D[2021-01-01]
@@ -150,8 +159,8 @@ defmodule TodoTex.Todo do
   """
   def to_string(%__MODULE__{} = todo), do: _to_string(todo, "")
 
-  defp _to_string(%__MODULE__{done: true} = todo, string) do
-    _to_string(%__MODULE__{todo | done: false}, "x " <> string)
+  defp _to_string(%__MODULE__{completed: true} = todo, string) do
+    _to_string(%__MODULE__{todo | completed: false}, "x " <> string)
   end
 
   defp _to_string(%__MODULE__{priority: pri} = todo, string) when not is_nil(pri) do
@@ -175,17 +184,50 @@ defmodule TodoTex.Todo do
 
   ## Examples
 
-      iex> Todo.complete(%Todo{done: false})
-      %Todo{done: true}
+      iex> Todo.complete(%Todo{completed: false})
+      %Todo{completed: true}
 
   """
   @spec complete(todo :: t()) :: t()
-  def complete(%__MODULE__{} = todo), do: %__MODULE__{todo | done: true}
+  def complete(%__MODULE__{} = todo), do: set_completed(todo, true)
+
+  @doc """
+  Sets completed to provided boolean value.
+
+  Does not change the task on disk, only updates the returned task in memory.
+
+  ## Examples
+
+      iex> Todo.set_completed(%Todo{}, true)
+      %Todo{completed: true}
+
+      iex> Todo.set_completed(%Todo{}, false)
+      %Todo{completed: false}
+
+  """
+  def set_completed(%__MODULE__{} = todo, complete) when is_boolean(complete),
+    do: %__MODULE__{todo | completed: complete}
 
   @doc """
   Sets the priority to the specified value.
 
-  Priority must be an uppercase ASCII letter (A-Z).
+  Priority must be an uppercase ASCII letter (A-Z). Does not update the task on
+  disk, only the returned task in memory.
+
+  ## Examples
+
+      iex> Todo.set_priority(%Todo{}, "A")
+      %Todo{priority: "A"}
+
+      iex> Todo.set_priority(%Todo{}, "Z")
+      %Todo{priority: "Z"}
+
+      iex> Todo.set_priority(%Todo{}, "AA")
+      ** (FunctionClauseError) no function clause matching in TodoTex.Todo.set_priority/2
+
+      iex> Todo.set_priority(%Todo{}, :badarg)
+      ** (FunctionClauseError) no function clause matching in TodoTex.Todo.set_priority/2
+
   """
   def set_priority(%__MODULE__{} = todo, <<priority::utf8>>) when priority in ?A..?Z,
     do: %__MODULE__{todo | priority: <<priority>>}
