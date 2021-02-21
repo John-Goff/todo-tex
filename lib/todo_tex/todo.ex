@@ -15,8 +15,7 @@ defmodule TodoTex.Todo do
           done: boolean(),
           projects: [String.t()],
           contexts: [String.t()],
-          task: String.t(),
-          original: String.t()
+          task: String.t()
         }
 
   defstruct priority: nil,
@@ -25,8 +24,7 @@ defmodule TodoTex.Todo do
             done: false,
             projects: [],
             contexts: [],
-            task: "",
-            original: ""
+            task: ""
 
   @doc """
   Turns a string into a properly formatted `%TodoTex.Todo{}` struct.
@@ -39,14 +37,13 @@ defmodule TodoTex.Todo do
   ## Examples
 
       iex> Todo.parse("x Call Mom")
-      {:ok, %Todo{done: true, task: "Call Mom", original: "x Call Mom"}}
+      {:ok, %Todo{done: true, task: "Call Mom"}}
 
       iex> Todo.parse("x (A) 2021-01-02 2021-01-01 Make a New Years Resolution")
       {:ok,
         %Todo{
           done: true,
           task: "Make a New Years Resolution",
-          original: "x (A) 2021-01-02 2021-01-01 Make a New Years Resolution",
           start_date: ~D[2021-01-01],
           end_date: ~D[2021-01-02],
           priority: "A"
@@ -58,7 +55,6 @@ defmodule TodoTex.Todo do
           projects: ["projects", "anywhere"],
           contexts: ["contexts", "task"],
           task: "+projects and @contexts can be +anywhere in the @task",
-          original: "+projects and @contexts can be +anywhere in the @task"
         }}
 
       iex> Todo.parse("")
@@ -76,7 +72,7 @@ defmodule TodoTex.Todo do
 
       {:ok, metadata, task, _context, _line, _offset} ->
         todo =
-          %__MODULE__{task: task, original: string}
+          %__MODULE__{task: task}
           |> _add_metadata(metadata)
           |> _add_projects(task)
           |> _add_contexts(task)
