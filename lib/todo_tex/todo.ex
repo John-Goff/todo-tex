@@ -85,6 +85,17 @@ defmodule TodoTex.Todo do
     end
   end
 
+  @doc """
+  Same as `parse/1` but raises if the string could not be parsed.
+  """
+  @spec parse!(String.t()) :: t()
+  def parse!(string) do
+    case parse(string) do
+      {:ok, todo} -> todo
+      _error -> raise "could not parse todo"
+    end
+  end
+
   defp _add_metadata(todo, [{:done, done} | rest]),
     do: _add_metadata(%__MODULE__{todo | done: done}, rest)
 

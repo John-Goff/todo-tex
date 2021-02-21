@@ -27,9 +27,14 @@ defmodule TodoTex do
 
   defp _parse_lines(file, items) do
     case IO.read(file, :line) do
-      :eof -> items
-      {:error, _reason} -> items
-      line_data -> _parse_lines(file, [TodoTex.Todo.parse(line_data) | items])
+      :eof ->
+        items
+
+      {:error, _reason} ->
+        items
+
+      line_data ->
+        _parse_lines(file, [TodoTex.Todo.parse!(String.trim_trailing(line_data)) | items])
     end
   end
 end
