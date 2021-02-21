@@ -83,8 +83,8 @@ defmodule TodoTex.Todo do
         todo =
           %__MODULE__{task: task}
           |> _add_metadata(metadata)
-          |> _add_projects(task)
-          |> _add_contexts(task)
+          |> _add_projects()
+          |> _add_contexts()
 
         {:ok, todo}
     end
@@ -124,11 +124,11 @@ defmodule TodoTex.Todo do
 
   defp _add_metadata(todo, []), do: todo
 
-  defp _add_projects(todo, task) do
+  defp _add_projects(%__MODULE__{task: task} = todo) do
     %__MODULE__{todo | projects: _substrings_starting_with(task, "+")}
   end
 
-  defp _add_contexts(todo, task) do
+  defp _add_contexts(%__MODULE__{task: task} = todo) do
     %__MODULE__{todo | contexts: _substrings_starting_with(task, "@")}
   end
 
@@ -251,11 +251,11 @@ defmodule TodoTex.Todo do
 
   ## Examples
 
-  iex> Todo.set_start_date(%Todo{}, ~D[2021-01-01])
-  %Todo{start_date: ~D[2021-01-01]}
+      iex> Todo.set_start_date(%Todo{}, ~D[2021-01-01])
+      %Todo{start_date: ~D[2021-01-01]}
 
-  iex> Todo.set_start_date(%Todo{}, :badarg)
-  ** (FunctionClauseError) no function clause matching in TodoTex.Todo.set_start_date/2
+      iex> Todo.set_start_date(%Todo{}, :badarg)
+      ** (FunctionClauseError) no function clause matching in TodoTex.Todo.set_start_date/2
 
   """
   @spec set_start_date(todo :: t(), start_date :: Date.t()) :: t()
@@ -269,13 +269,56 @@ defmodule TodoTex.Todo do
 
   ## Examples
 
-  iex> Todo.set_end_date(%Todo{}, ~D[2021-01-01])
-  %Todo{end_date: ~D[2021-01-01]}
+      iex> Todo.set_end_date(%Todo{}, ~D[2021-01-01])
+      %Todo{end_date: ~D[2021-01-01]}
 
-  iex> Todo.set_end_date(%Todo{}, :badarg)
-  ** (FunctionClauseError) no function clause matching in TodoTex.Todo.set_end_date/2
+      iex> Todo.set_end_date(%Todo{}, :badarg)
+      ** (FunctionClauseError) no function clause matching in TodoTex.Todo.set_end_date/2
 
   """
   @spec set_end_date(todo :: t(), end_date :: Date.t()) :: t()
   def set_end_date(%__MODULE__{} = todo, %Date{} = date), do: %__MODULE__{todo | end_date: date}
+
+  @doc """
+  Prepends given string to the task.
+
+  Will update the `projects` and `contexts` fields as well.
+
+  ## Examples
+
+      iex> Todo.prepend_task(%Todo{task: " is incomplete"}, "This task")
+      %Todo{task: "This task is incomplete"}
+
+  """
+  @spec prepend_task(todo :: t(), String.t()) :: t()
+  def prepend_task(%__MODULE__{task: task} = todo, text), do: set_task(todo, text <> task)
+
+  @doc """
+  Appends given string to the task.
+
+  Will update the `projects` and `contexts` fields as well.
+
+  ## Examples
+
+      iex> Todo.append_task(%Todo{task: "This task"}, " is incomplete")
+      %Todo{task: "This task is incomplete"}
+
+  """
+  @spec append_task(todo :: t(), String.t()) :: t()
+  def append_task(%__MODULE__{task: task} = todo, text), do: set_task(todo, task <> text)
+
+  @doc """
+  Sets the task to the given string.
+
+  Will update the `projects` and `contexts` fields as well.
+
+  ## Examples
+
+      iex> Todo.set_task(%Todo{task: "This task is replaced"}, "This task is set")
+      %Todo{task: "This task is set"}
+
+  """
+  @spec set_task(todo :: t(), String.t()) :: t()
+  def set_task(%__MODULE__{} = todo, text),
+    do: %__MODULE__{todo | task: text} |> _add_projects() |> _add_contexts()
 end
