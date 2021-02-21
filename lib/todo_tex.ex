@@ -1,6 +1,6 @@
 defmodule TodoTex do
   @moduledoc """
-  Elixir library for reading and writing ToDo files in `todo.txt` format.
+  Elixir library for reading and writing todo files in `todo.txt` format.
 
   The most basic operation is `TodoTex.read!/1`, which takes a path to a `txt`
   file in the `todo.txt` format. See [the todo.txt github](https://github.com/todotxt/todo.txt) for a description
@@ -25,6 +25,7 @@ defmodule TodoTex do
   """
   @spec read!(path :: String.t()) :: t()
   def read!(path) when is_binary(path) do
+    path = Path.absname(path)
     file = File.open!(path, [:read, :utf8])
     list = _parse_lines(file, [])
     File.close(file)
