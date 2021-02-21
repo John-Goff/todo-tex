@@ -96,7 +96,7 @@ defmodule TodoTex.Todo do
     do: _add_metadata(%__MODULE__{todo | done: done}, rest)
 
   defp _add_metadata(todo, [{:priority, pri} | rest]),
-    do: _add_metadata(%__MODULE__{todo | priority: pri}, rest)
+    do: todo |> set_priority(pri) |> _add_metadata(rest)
 
   defp _add_metadata(todo, [{:date, :start, date} | rest]),
     do: _add_metadata(%__MODULE__{todo | start_date: date}, rest)
@@ -181,4 +181,12 @@ defmodule TodoTex.Todo do
   """
   @spec complete(todo :: t()) :: t()
   def complete(%__MODULE__{} = todo), do: %__MODULE__{todo | done: true}
+
+  @doc """
+  Sets the priority to the specified value.
+
+  Priority must be an uppercase ASCII letter (A-Z).
+  """
+  def set_priority(%__MODULE__{} = todo, <<priority::utf8>>) when priority in ?A..?Z,
+    do: %__MODULE__{todo | priority: <<priority>>}
 end
