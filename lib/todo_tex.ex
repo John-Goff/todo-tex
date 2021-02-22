@@ -65,4 +65,31 @@ defmodule TodoTex do
   def complete(%TodoTex{items: items} = todolist, index) when is_integer(index) and index >= 0 do
     %__MODULE__{todolist | items: List.update_at(items, index, &TodoTex.Todo.complete/1)}
   end
+
+  @doc """
+  Turns a todolist into a string.
+
+  ## Examples
+
+      iex> TodoTex.to_string(%TodoTex{items: [%TodoTex.Todo{task: "Call Mom"}, %TodoTex.Todo{task: "Buy groceries"}]})
+      "Call Mom\nBuy groceries"
+
+  """
+  @spec to_string(todolist :: t()) :: String.t()
+  def to_string(%TodoTex{items: items}),
+    do: items |> Enum.map(&TodoTex.Todo.to_string/1) |> Enum.join("\n")
+
+  @doc """
+  Writes the todolist to disk.
+
+  The contents of the file specified in the `path` key will be overwritten.
+  """
+  @spec write!(todolist :: t()) :: :ok | {:error, File.posix()}
+  def write!(%TodoTex{path: path} = todolist) do
+    File.write!(path, Kernel.to_string(todolist))
+  end
+end
+
+defimpl String.Chars, for: TodoTex do
+  def to_string(%TodoTex{} = todolist), do: TodoTex.to_string(todolist)
 end
