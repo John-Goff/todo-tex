@@ -72,7 +72,8 @@ defmodule TodoTex do
   ## Examples
 
       iex> TodoTex.to_string(%TodoTex{items: [%TodoTex.Todo{task: "Call Mom"}, %TodoTex.Todo{task: "Buy groceries"}]})
-      "Call Mom\nBuy groceries"
+      "Call Mom
+      Buy groceries"
 
   """
   @spec to_string(todolist :: t()) :: String.t()
@@ -86,7 +87,7 @@ defmodule TodoTex do
   """
   @spec write!(todolist :: t()) :: :ok | {:error, File.posix()}
   def write!(%TodoTex{path: path} = todolist) do
-    File.write!(path, Kernel.to_string(todolist))
+    File.write!(path, TodoTex.to_string(todolist))
   end
 end
 
