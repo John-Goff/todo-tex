@@ -54,10 +54,16 @@ defmodule TodoTex do
 
   ## Examples
 
-      iex> TodoTex.complete(%TodoTex{items: [%TodoTex.Todo{completed: false}]}, 0)
+      iex> TodoTex.complete(
+      ...>   %TodoTex{items: [%TodoTex.Todo{completed: false}]},
+      ...>   0
+      ...> )
       %TodoTex{items: [%TodoTex.Todo{completed: true}]}
 
-      iex> TodoTex.complete(%TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{completed: false}]}, 1)
+      iex> TodoTex.complete(
+      ...>   %TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{completed: false}]},
+      ...>   1
+      ...> )
       %TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{completed: true}]}
 
   """
@@ -67,11 +73,210 @@ defmodule TodoTex do
   end
 
   @doc """
+  Changes priority of task at `index`.
+
+  Index starts at zero for the first task in the list. This function will not
+  update the underlying `todo.txt` file, it will only change the tasks in
+  memory. To write the changed tasks back to disk see `write!/1`.
+
+  ## Examples
+
+      iex> TodoTex.set_priority(
+      ...>   %TodoTex{items: [%TodoTex.Todo{priority: "A"}]},
+      ...>   0,
+      ...>   "B"
+      ...> )
+      %TodoTex{items: [%TodoTex.Todo{priority: "B"}]}
+
+      iex> TodoTex.set_priority(
+      ...>   %TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{priority: "B"}]},
+      ...>   1,
+      ...>   "A"
+      ...> )
+      %TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{priority: "A"}]}
+
+  """
+  @spec set_priority(t(), non_neg_integer(), String.t()) :: t()
+  def set_priority(%TodoTex{items: items} = todolist, index, priority)
+      when is_integer(index) and index >= 0 do
+    new_items =
+      List.update_at(items, index, fn todo -> TodoTex.Todo.set_priority(todo, priority) end)
+
+    %__MODULE__{todolist | items: new_items}
+  end
+
+  @doc """
+  Changes start date of task at `index`.
+
+  Index starts at zero for the first task in the list. This function will not
+  update the underlying `todo.txt` file, it will only change the tasks in
+  memory. To write the changed tasks back to disk see `write!/1`.
+
+  ## Examples
+
+      iex> TodoTex.set_start_date(
+      ...>   %TodoTex{items: [%TodoTex.Todo{start_date: ~D[2021-01-01]}]},
+      ...>   0,
+      ...>   ~D[2021-01-02]
+      ...> )
+      %TodoTex{items: [%TodoTex.Todo{start_date: ~D[2021-01-02]}]}
+
+      iex> TodoTex.set_start_date(
+      ...>   %TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{start_date: ~D[2021-01-01]}]},
+      ...>   1,
+      ...>   ~D[2021-01-02]
+      ...> )
+      %TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{start_date: ~D[2021-01-02]}]}
+
+  """
+  @spec set_start_date(t(), non_neg_integer(), Date.t()) :: t()
+  def set_start_date(%TodoTex{items: items} = todolist, index, date)
+      when is_integer(index) and index >= 0 do
+    new_items =
+      List.update_at(items, index, fn todo -> TodoTex.Todo.set_start_date(todo, date) end)
+
+    %__MODULE__{todolist | items: new_items}
+  end
+
+  @doc """
+  Changes end date of task at `index`.
+
+  Index starts at zero for the first task in the list. This function will not
+  update the underlying `todo.txt` file, it will only change the tasks in
+  memory. To write the changed tasks back to disk see `write!/1`.
+
+  ## Examples
+
+      iex> TodoTex.set_end_date(
+      ...>   %TodoTex{items: [%TodoTex.Todo{end_date: ~D[2021-01-01]}]},
+      ...>   0,
+      ...>   ~D[2021-01-02]
+      ...> )
+      %TodoTex{items: [%TodoTex.Todo{end_date: ~D[2021-01-02]}]}
+
+      iex> TodoTex.set_end_date(
+      ...>   %TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{end_date: ~D[2021-01-01]}]},
+      ...>   1,
+      ...>   ~D[2021-01-02]
+      ...> )
+      %TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{end_date: ~D[2021-01-02]}]}
+
+  """
+  @spec set_end_date(t(), non_neg_integer(), Date.t()) :: t()
+  def set_end_date(%TodoTex{items: items} = todolist, index, date)
+      when is_integer(index) and index >= 0 do
+    new_items = List.update_at(items, index, fn todo -> TodoTex.Todo.set_end_date(todo, date) end)
+
+    %__MODULE__{todolist | items: new_items}
+  end
+
+  @doc """
+  Prepends to task at `index`.
+
+  Index starts at zero for the first task in the list. This function will not
+  update the underlying `todo.txt` file, it will only change the tasks in
+  memory. To write the changed tasks back to disk see `write!/1`.
+
+  ## Examples
+
+      iex> TodoTex.prepend_task(
+      ...>   %TodoTex{items: [%TodoTex.Todo{task: " is incomplete"}]},
+      ...>   0,
+      ...>   "This task"
+      ...> )
+      %TodoTex{items: [%TodoTex.Todo{task: "This task is incomplete"}]}
+
+      iex> TodoTex.prepend_task(
+      ...>   %TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{task: " is incomplete"}]},
+      ...>   1,
+      ...>   "This task"
+      ...> )
+      %TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{task: "This task is incomplete"}]}
+
+  """
+  @spec prepend_task(t(), non_neg_integer(), String.t()) :: t()
+  def prepend_task(%TodoTex{items: items} = todolist, index, task)
+      when is_integer(index) and index >= 0 do
+    new_items = List.update_at(items, index, fn todo -> TodoTex.Todo.prepend_task(todo, task) end)
+
+    %__MODULE__{todolist | items: new_items}
+  end
+
+  @doc """
+  Appends to task at `index`.
+
+  Index starts at zero for the first task in the list. This function will not
+  update the underlying `todo.txt` file, it will only change the tasks in
+  memory. To write the changed tasks back to disk see `write!/1`.
+
+  ## Examples
+
+      iex> TodoTex.append_task(
+      ...>   %TodoTex{items: [%TodoTex.Todo{task: "This task"}]},
+      ...>   0,
+      ...>   " is incomplete"
+      ...> )
+      %TodoTex{items: [%TodoTex.Todo{task: "This task is incomplete"}]}
+
+      iex> TodoTex.append_task(
+      ...>   %TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{task: "This task"}]},
+      ...>   1,
+      ...>   " is incomplete"
+      ...> )
+      %TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{task: "This task is incomplete"}]}
+
+  """
+  @spec append_task(t(), non_neg_integer(), String.t()) :: t()
+  def append_task(%TodoTex{items: items} = todolist, index, task)
+      when is_integer(index) and index >= 0 do
+    new_items = List.update_at(items, index, fn todo -> TodoTex.Todo.append_task(todo, task) end)
+
+    %__MODULE__{todolist | items: new_items}
+  end
+
+  @doc """
+  Sets the task at `index`.
+
+  Index starts at zero for the first task in the list. This function will not
+  update the underlying `todo.txt` file, it will only change the tasks in
+  memory. To write the changed tasks back to disk see `write!/1`.
+
+  ## Examples
+
+      iex> TodoTex.set_task(
+      ...>   %TodoTex{items: [%TodoTex.Todo{task: "This task is replaced"}]},
+      ...>   0,
+      ...>   "This task is set"
+      ...> )
+      %TodoTex{items: [%TodoTex.Todo{task: "This task is set"}]}
+
+      iex> TodoTex.set_task(
+      ...>   %TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{task: "This task is replaced"}]},
+      ...>   1,
+      ...>   "This task is set"
+      ...> )
+      %TodoTex{items: [%TodoTex.Todo{}, %TodoTex.Todo{task: "This task is set"}]}
+
+  """
+  @spec set_task(t(), non_neg_integer(), String.t()) :: t()
+  def set_task(%TodoTex{items: items} = todolist, index, task)
+      when is_integer(index) and index >= 0 do
+    new_items = List.update_at(items, index, fn todo -> TodoTex.Todo.set_task(todo, task) end)
+
+    %__MODULE__{todolist | items: new_items}
+  end
+
+  @doc """
   Turns a todolist into a string.
 
   ## Examples
 
-      iex> TodoTex.to_string(%TodoTex{items: [%TodoTex.Todo{task: "Call Mom"}, %TodoTex.Todo{task: "Buy groceries"}]})
+      iex> TodoTex.to_string(
+      ...>   %TodoTex{items: [
+      ...>     %TodoTex.Todo{task: "Call Mom"},
+      ...>     %TodoTex.Todo{task: "Buy groceries"}
+      ...>   ]}
+      ...> )
       "Call Mom
       Buy groceries"
 
