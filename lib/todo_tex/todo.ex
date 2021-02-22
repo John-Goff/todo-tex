@@ -322,3 +322,7 @@ defmodule TodoTex.Todo do
   def set_task(%__MODULE__{} = todo, text),
     do: %__MODULE__{todo | task: text} |> _add_projects() |> _add_contexts()
 end
+
+defimpl String.Chars, for: TodoTex.Todo do
+  def to_string(todo), do: TodoTex.Todo.to_string(todo)
+end
