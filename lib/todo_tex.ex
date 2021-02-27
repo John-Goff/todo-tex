@@ -310,3 +310,19 @@ end
 defimpl String.Chars, for: TodoTex do
   def to_string(%TodoTex{} = todolist), do: TodoTex.to_string(todolist)
 end
+
+defimpl Enumerable, for: TodoTex do
+  def count(%TodoTex{}), do: {:error, __MODULE__}
+  def member?(%TodoTex{}, _item), do: {:error, __MODULE__}
+  def slice(%TodoTex{}), do: {:error, __MODULE__}
+
+  def reduce(_todolist, {:halt, acc}, _fun), do: {:halted, acc}
+
+  def reduce(%TodoTex{} = todolist, {:suspend, acc}, fun),
+    do: {:suspended, acc, &reduce(todolist, &1, fun)}
+
+  def reduce(%TodoTex{items: []}, {:cont, acc}, _fun), do: {:done, acc}
+
+  def reduce(%TodoTex{items: [head | tail]} = todolist, {:cont, acc}, fun),
+    do: reduce(%TodoTex{todolist | items: tail}, fun.(head, acc), fun)
+end
