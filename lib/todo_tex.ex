@@ -13,6 +13,17 @@ defmodule TodoTex do
   the file. From here, you can use the functions in this module to update the
   todos inside the list, or you can manipulate the todos directly with the
   `TodoTex.Todo` module.
+
+  `TodoTex` implements both the `Enumerable` and `Collectable` protocols.
+  This means that you can use the functions in the `Enum` module to transform
+  and work with todolists. Note however that an example such as this
+
+      TodoTex.read!(path) |> Enum.map(&transform_todo/1) |> Enum.into(%TodoTex{})
+
+  will work to transform each todo according to `transform_todo`, but it will
+  discard the path information so the resulting todolist cannot be written
+  unless it is updated with the correct path. For that reason, `TodoTex.map/2`
+  is provided which will maintain path information.
   """
 
   @type t() :: %__MODULE__{
@@ -304,6 +315,18 @@ defmodule TodoTex do
   @spec write!(todolist :: t()) :: :ok | {:error, File.posix()}
   def write!(%TodoTex{path: path} = todolist) do
     File.write!(path, TodoTex.to_string(todolist))
+  end
+
+  @doc """
+  Transforms each todo in the todolist according to `fun`.
+
+  Note that the functions in the `Enum` module are also supported, as well as
+  `for` comprehensions. However these will not maintain `path` so the
+  `todolist` cannot be written back to disk. This function does maintain
+  the `path` field.
+  """
+  def map(%TodoTex{items: items} = todolist, fun) when is_function(fun, 1) do
+    %TodoTex{todolist | items: Enum.map(items, fun)}
   end
 end
 
