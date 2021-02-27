@@ -2,9 +2,17 @@ defmodule TodoTex do
   @moduledoc """
   Elixir library for reading and writing todo files in `todo.txt` format.
 
+  The `todo.txt` format is a way of specifiying tasks in a plain `txt` file.
+  See [the todo.txt github](https://github.com/todotxt/todo.txt) for a description of the format.
+  This library intends to be a simple way to read, update, and write a
+  `todo.txt` file.
+
   The most basic operation is `TodoTex.read!/1`, which takes a path to a `txt`
-  file in the `todo.txt` format. See [the todo.txt github](https://github.com/todotxt/todo.txt) for a description
-  of the format.
+  file in the `todo.txt` format. This returns a `TodoTex` struct which holds
+  all the todo items in the `items` key, as well as the `path` to later update
+  the file. From here, you can use the functions in this module to update the
+  todos inside the list, or you can manipulate the todos directly with the
+  `TodoTex.Todo` module.
   """
 
   @type t() :: %__MODULE__{
