@@ -30,6 +30,9 @@ defmodule TodoTex do
       TodoTex.read!("/path/to/todo.txt")
       %TodoTex{path: "/path/to/todo.txt", list: [%TodoTex.Item{}, ...]}
 
+      TodoTex.read!("rel/path/to/todo.txt")
+      %TodoTex{path: "/abs/path/to/rel/path/to/todo.txt", list: [%TodoTex.Item{}, ...]}
+
   """
   @spec read!(path :: String.t()) :: t()
   def read!(path) when is_binary(path) do
