@@ -326,3 +326,20 @@ defimpl Enumerable, for: TodoTex do
   def reduce(%TodoTex{items: [head | tail]} = todolist, {:cont, acc}, fun),
     do: reduce(%TodoTex{todolist | items: tail}, fun.(head, acc), fun)
 end
+
+defimpl Collectable, for: TodoTex do
+  def into(list) do
+    collector_fun = fn
+      todolist, {:cont, %TodoTex.Todo{} = elem} ->
+        %TodoTex{todolist | items: [elem | todolist.items]}
+
+      todolist, :done ->
+        todolist
+
+      _todolist, :halt ->
+        :ok
+    end
+
+    {list, collector_fun}
+  end
+end
